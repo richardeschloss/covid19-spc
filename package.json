@@ -1,0 +1,76 @@
+{
+  "name": "covid19-spc",
+  "version": "1.0.0",
+  "description": "Covid19 Statistical Process Control Charts",
+  "author": "Richard Schloss",
+  "license": "MIT",
+  "contributors": [
+    {
+      "name": "Richard Schloss"
+    }
+  ],
+  "keywords": [
+    "covid19",
+    "spc",
+    "nuxtjs",
+    "vue",
+    "vuejs",
+    "statistics"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": "https://github.com/richardeschloss/covid19-spc",
+  "scripts": {
+    "dev": "nuxt",
+    "build": "nuxt build",
+    "start": "cross-env node server/index.js",
+    "generate": "nuxt generate",
+    "lint": "eslint --ext .js,.vue --ignore-path .gitignore .",
+    "test": "cross-env NODE_ENV=test npm run test:specs:cov && npm run test:e2e:cov",
+    "test:specs": "cross-env TEST=specs ava --config specs.config.js",
+    "test:specs:cov": "cross-env TEST=specs nyc ava --timeout=10m --config specs.config.js",
+    "test:specs:watch": "cross-env TEST=specs ava --config specs.config.js --color --watch",
+    "test:e2e": "cross-env TEST=e2e ava --config e2e.config.js",
+    "test:e2e:cov": "cross-env TEST=e2e nyc --no-clean ava --timeout=10m --config e2e.config.js",
+    "test:e2e:watch": "cross-env TEST=e2e ava --config e2e.config.js --color --watch"
+  },
+  "files": [],
+  "dependencies": {
+    "axios": "^0.19.2",
+    "csv-parse": "^4.9.0",
+    "highcharts": "^8.0.4",
+    "highcharts-vue": "^1.3.5",
+    "vue-template-compiler": "^2.6.11"
+  },
+  "devDependencies": {
+    "@ava/babel": "^1.0.1",
+    "@babel/cli": "^7.8.4",
+    "@babel/core": "^7.9.6",
+    "@babel/node": "^7.8.7",
+    "@babel/preset-env": "^7.9.6",
+    "@nuxtjs/eslint-config": "^1.0.1",
+    "@nuxtjs/eslint-module": "^1.2.0",
+    "@vue/test-utils": "^1.0.0-beta.33",
+    "ava": "^3.8.1",
+    "babel-eslint": "^10.1.0",
+    "babel-plugin-module-resolver": "^3.2.0",
+    "bootstrap": "^4.4.1",
+    "bootstrap-vue": "^2.13.0",
+    "browser-env": "^3.3.0",
+    "cross-env": "^5.2.0",
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^4.1.0",
+    "eslint-plugin-nuxt": "^0.5.2",
+    "eslint-plugin-prettier": "^3.1.3",
+    "express": "^4.16.4",
+    "jsdom-global": "^3.0.2",
+    "nodemon": "^1.19.4",
+    "nuxt": "^2.12.2",
+    "nyc": "^14.1.1",
+    "prettier": "^1.19.1",
+    "require-extension-hooks": "^0.3.3",
+    "require-extension-hooks-babel": "^1.0.0",
+    "require-extension-hooks-vue": "^2.0.0"
+  }
+}
