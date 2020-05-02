@@ -1,5 +1,5 @@
 <template>
-  <div style="width:25%;">
+  <div>
     <div>
       <input
         v-model="selectedState"
