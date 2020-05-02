@@ -1,6 +1,9 @@
 <template>
   <div>
-    <highcharts :options="chartOptions"></highcharts>
+    <highcharts
+      :options="chartOptions"
+      v-if="trendData.length > 0"
+    ></highcharts>
   </div>
 </template>
 
