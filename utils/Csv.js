@@ -1,6 +1,9 @@
 import axios from 'axios'
 
 const Csv = {
+  extractColumn(arr, col) {
+    return arr.map((r) => r[col])
+  },
   async fetch(url) {
     const { data } = await axios.get(url)
     const raw = Csv.parse(data)

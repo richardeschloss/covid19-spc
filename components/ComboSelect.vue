@@ -4,11 +4,11 @@
       <input
         v-model="selectedItem"
         :placeholder="placeholder"
-        list="items"
+        :list="id"
         class="form-control"
       />
     </div>
-    <datalist id="items">
+    <datalist :id="id">
       <option v-for="item in items" :key="item" :value="item" />
     </datalist>
   </div>
@@ -17,6 +17,10 @@
 <script>
 export default {
   props: {
+    id: {
+      type: String,
+      default: () => ''
+    },
     items: {
       type: Array,
       default: () => []
@@ -38,6 +42,8 @@ export default {
       set(val) {
         if (val && this.items.includes(val)) {
           this.$emit('itemSelected', val)
+        } else {
+          this.$emit('input', val)
         }
       }
     }
