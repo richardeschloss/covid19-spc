@@ -62,6 +62,9 @@ export default {
   },
   data() {
     return {
+      casesTitle: 'Cases (Daily Increase) -- [select state]',
+      deathsTitle: 'Deaths (Daily Increase) -- [select state]',
+      deathSubTitle: 'Deaths / Population: ',
       selectedRegion: '',
       selectedState: '',
       casesInfo: {
@@ -79,28 +82,6 @@ export default {
       totalDeaths: []
     }
   },
-  computed: {
-    casesTitle() {
-      return (
-        'Cases (Daily Increase) -- ' +
-        (this.selectedState !== '' ? this.selectedState : '[select state]')
-      )
-    },
-    deathsTitle() {
-      return (
-        'Deaths (Daily Increase) -- ' +
-        (this.selectedState !== '' ? this.selectedState : '[select state]')
-      )
-    },
-    deathSubTitle() {
-      return (
-        'Deaths / Population: ' +
-        (this.deathsInfo.deathRate > 0
-          ? (this.deathsInfo.deathRate * 100).toFixed(4) + '%'
-          : '')
-      )
-    }
-  },
   fetch() {
     this.selectedState = localStorage.getItem('selectedState') || ''
     this.selectedRegion = localStorage.getItem('selectedRegion') || ''
@@ -111,10 +92,8 @@ export default {
       this.parseCases(rawCases)
       this.parseDeaths(rawDeaths)
       if (this.selectedState !== '') {
-        this.summarizeByState()
-        if (this.selectedRegion !== '') {
-          this.summarizeByRegion()
-        }
+        this.summarizeCases()
+        this.summarizeDeaths()
       }
     })
   },
@@ -156,62 +135,73 @@ export default {
     regionInput(input) {
       if (input === '') {
         this.selectedRegion = ''
-        this.summarizeByState()
+        this.summarizeCases()
+        this.summarizeDeaths()
       }
     },
     regionSelected(region) {
       localStorage.setItem('selectedRegion', region)
       this.selectedRegion = region
-      this.summarizeByRegion()
+      this.summarizeCases()
+      this.summarizeDeaths()
     },
     stateSelected(state) {
       localStorage.setItem('selectedState', state)
       this.selectedState = state
-      this.summarizeByState()
+      this.selectedRegion = ''
+      this.summarizeCases()
+      this.summarizeDeaths()
     },
-
-    summarizeByRegion() {
-      this.summarizeRegionCases()
-      this.summarizeRegionDeaths()
-    },
-
-    summarizeByState() {
-      this.summarizeStateCases()
-      this.summarizeStateDeaths()
-    },
-
-    summarizeRegionCases() {
-      const filteredCases = Csv.filterRows(
-        this.casesInfo.cases,
-        this.selectedRegion,
-        this.casesInfo.regionIdx
-      )
-
-      this.totalCases = Csv.subtotals(filteredCases, this.casesInfo.datesIdx)
-    },
-
-    summarizeStateCases() {
-      const filteredCases = Csv.filterRows(
+    summarizeCases() {
+      let filtered = Csv.filterRows(
         this.casesInfo.cases,
         this.selectedState,
         this.casesInfo.statesIdx
       )
 
       this.casesInfo.regions = Csv.extractColumn(
-        filteredCases,
+        filtered,
         this.casesInfo.regionIdx
       )
-      this.totalCases = Csv.subtotals(filteredCases, this.casesInfo.datesIdx)
+      if (this.selectedRegion !== '') {
+        filtered = Csv.filterRows(
+          this.casesInfo.cases,
+          this.selectedRegion,
+          this.casesInfo.regionIdx
+        )
+
+        this.totalCases = Csv.subtotals(filtered, this.casesInfo.datesIdx)
+        this.casesTitle = `Cases (Daily Increase) -- ${this.selectedRegion}, ${this.selectedState}`
+      } else {
+        this.totalCases = Csv.subtotals(filtered, this.casesInfo.datesIdx)
+        this.casesTitle = `Cases (Daily Increase) -- ${this.selectedState}`
+      }
     },
+    summarizeDeaths() {
+      let filtered
+      if (this.selectedRegion !== '') {
+        filtered = Csv.filterRows(
+          this.deathsInfo.deaths,
+          this.selectedRegion,
+          this.deathsInfo.regionIdx
+        )
 
-    summarizeRegionDeaths() {
-      const filtered = Csv.filterRows(
-        this.deathsInfo.deaths,
-        this.selectedRegion,
-        this.deathsInfo.regionIdx
-      )
+        this.deathsTitle = `Deaths (Daily Increase) -- ${this.selectedRegion}, ${this.selectedState}`
+      } else {
+        filtered = Csv.filterRows(
+          this.deathsInfo.deaths,
+          this.selectedState,
+          this.deathsInfo.statesIdx
+        )
 
+        this.deathsInfo.regions = Csv.extractColumn(
+          filtered,
+          this.deathsInfo.regionIdx
+        )
+        this.deathsTitle = `Deaths (Daily Increase) -- ${this.selectedState}`
+      }
       this.totalDeaths = Csv.subtotals(filtered, this.deathsInfo.datesIdx)
+
       const lastDeathCnt = this.totalDeaths[this.totalDeaths.length - 1]
       const totalPopulation = Csv.sumColumn(
         filtered,
@@ -219,27 +209,9 @@ export default {
       )
 
       this.deathsInfo.deathRate = lastDeathCnt / totalPopulation
-    },
-
-    summarizeStateDeaths() {
-      const filteredCases = Csv.filterRows(
-        this.deathsInfo.deaths,
-        this.selectedState,
-        this.deathsInfo.statesIdx
-      )
-
-      this.deathsInfo.regions = Csv.extractColumn(
-        filteredCases,
-        this.deathsInfo.regionIdx
-      )
-      this.totalDeaths = Csv.subtotals(filteredCases, this.deathsInfo.datesIdx)
-      const lastDeathCnt = this.totalDeaths[this.totalDeaths.length - 1]
-      const totalPopulation = Csv.sumColumn(
-        filteredCases,
-        this.deathsInfo.populationIdx
-      )
-
-      this.deathsInfo.deathRate = lastDeathCnt / totalPopulation
+      this.deathSubTitle = `Deaths / Population: ${(
+        this.deathsInfo.deathRate * 100
+      ).toFixed(4)}%`
     }
   }
 }
