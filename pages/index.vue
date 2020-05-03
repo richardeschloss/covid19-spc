@@ -10,13 +10,15 @@
       <p v-if="$fetchState.timestamp">
         Data Fetched: {{ new Date($fetchState.timestamp).toLocaleString() }}
       </p>
-      <combo-select
-        v-model="selectedState"
-        :items="casesInfo.states"
-        @itemSelected="stateSelected"
-        placeholder="Select State"
-        class="region-select"
-      />
+      <div class="row">
+        <combo-select
+          v-model="selectedState"
+          :items="casesInfo.states"
+          @itemSelected="stateSelected"
+          placeholder="Select State"
+          class="col-md-6"
+        />
+      </div>
       <div class="row">
         <trend-chart
           :dates="casesInfo.dates"
@@ -39,7 +41,7 @@
 </template>
 
 <script>
-import axios from 'axios'
+import Csv from '@/utils/Csv'
 import ComboSelect from '@/components/ComboSelect'
 import TrendChart from '@/components/TrendChart'
 
@@ -52,57 +54,55 @@ export default {
     return {
       selectedState: '',
       casesInfo: {},
-      statesIdx: 0,
-      states: [],
-      deathsTitle: 'Deaths (Daily Increase) -- [select state]',
-      deathSubTitle: 'Deaths / Population:',
+      deathsInfo: {
+        deathRate: 0
+      },
       totalCases: [],
       totalDeaths: []
     }
   },
   computed: {
     casesTitle() {
-      return 'Cases (Daily Increase) -- ' + this.selectedState !== ''
-        ? this.selectedState
-        : '[select state]'
+      return (
+        'Cases (Daily Increase) -- ' +
+        (this.selectedState !== '' ? this.selectedState : '[select state]')
+      )
+    },
+    deathsTitle() {
+      return (
+        'Deaths (Daily Increase) -- ' +
+        (this.selectedState !== '' ? this.selectedState : '[select state]')
+      )
+    },
+    deathSubTitle() {
+      return (
+        'Deaths / Population: ' +
+        (this.deathsInfo.deathRate > 0
+          ? (this.deathsInfo.deathRate * 100).toFixed(4) + '%'
+          : '')
+      )
     }
   },
   fetch() {
-    const p = [this.getCases(), this.getDeaths()]
+    this.selectedState = localStorage.getItem('selectedState') || ''
+    const p = [process.env.casesUrl, process.env.deathsUrl].map(Csv.fetch)
     console.time('fetch')
     Promise.all(p).then(([rawCases, rawDeaths]) => {
       console.timeEnd('fetch')
       this.parseCases(rawCases)
+      this.parseDeaths(rawDeaths)
+      if (this.selectedState !== '') {
+        this.summarizeByState()
+      }
     })
   },
   fetchOnServer: false,
   methods: {
-    calcTotals(matrix, colOffset) {
-      return matrix
-        .map((r) => r.slice(colOffset))
-        .reduce((cum, cols) => {
-          if (cum.length === 0) {
-            cum = Array(cols.length).fill(0)
-          }
-          return cols.map((col, idx) => (cum[idx] += parseInt(col)))
-        }, [])
-    },
-    parseCsv(data) {
-      return data
-        .trim()
-        .replace(/".+"/g, '---')
-        .split('\n')
-        .map((r) => r.split(','))
-    },
-    async getCases() {
-      const { casesUrl } = process.env
-      const { data } = await axios.get(casesUrl)
-      const raw = this.parseCsv(data)
-      return { hdr: raw[0], data: raw.slice(1) }
-    },
     parseCases({ hdr, data }) {
-      const { datesIdx, dates } = this.extractDates(hdr, 'Combined_Key')
-      const { statesIdx, states } = this.extractStates(hdr, data)
+      const datesIdx = Csv.propIdx(hdr, 'Combined_Key', 1)
+      const dates = hdr.slice(datesIdx).map((d) => new Date(d).getTime())
+      const statesIdx = Csv.propIdx(hdr, 'Province_State')
+      const states = Csv.uniqueByColumn(data, statesIdx)
       Object.assign(this.casesInfo, {
         datesIdx,
         dates,
@@ -110,39 +110,21 @@ export default {
         states,
         cases: data
       })
-      this.selectedState = localStorage.getItem('selectedState') || ''
-      if (this.selectedState !== '') {
-        this.summarizeByState()
-      }
     },
-    async getDeaths() {
-      const { deathsUrl } = process.env
-      const { data } = await axios.get(deathsUrl)
-      return this.parseCsv(data)
-      // const raw = this.parseCsv(data)
-      // this.deathsHdr = raw[0]
-      // this.deaths = raw.slice(1)
-      // this.extractDeathDates()
-    },
-    extractDates(hdr, datesProp, datesOffset = 1) {
-      const datesIdx = hdr.findIndex((i) => i === datesProp) + datesOffset
-      return {
+    parseDeaths({ hdr, data }) {
+      const populationIdx = Csv.propIdx(hdr, 'Population')
+      const datesIdx = populationIdx + 1
+      const dates = hdr.slice(datesIdx).map((d) => new Date(d).getTime())
+      const statesIdx = Csv.propIdx(hdr, 'Province_State')
+      const states = Csv.uniqueByColumn(data, statesIdx)
+      Object.assign(this.deathsInfo, {
+        populationIdx,
         datesIdx,
-        dates: hdr.slice(datesIdx).map((d) => new Date(d).getTime())
-      }
-    },
-    extractStates(hdr, data, statesProp = 'Province_State') {
-      const statesIdx = hdr.findIndex((i) => i === statesProp)
-      return {
+        dates,
         statesIdx,
-        states: Array.from(new Set(data.map((r) => r[statesIdx]))).sort()
-      }
-    },
-    extractDeathDates() {
-      this.deathsIdx = this.deathsHdr.findIndex((i) => i === 'Population') + 1
-      this.deathDates = this.deaths
-        .slice(this.deathsIdx)
-        .map((d) => new Date(d).getTime())
+        states,
+        deaths: data
+      })
     },
     stateSelected(state) {
       localStorage.setItem('selectedState', state)
@@ -151,42 +133,30 @@ export default {
     },
     summarizeByState() {
       this.summarizeStateCases()
-    },
-    filterBy(arr, prop, colIdx) {
-      return arr.filter((r) => r[colIdx] === prop)
+      this.summarizeStateDeaths()
     },
     summarizeStateCases() {
-      const filteredCases = this.filterBy(
+      const filteredCases = Csv.filterRows(
         this.casesInfo.cases,
         this.selectedState,
         this.casesInfo.statesIdx
       )
-      this.totalCases = this.calcTotals(filteredCases, this.casesInfo.datesIdx)
+      this.totalCases = Csv.subtotals(filteredCases, this.casesInfo.datesIdx)
     },
-    summarizeDeaths(state) {
-      const byStateCases = this.deaths.filter(
-        (r) => r[this.statesIdx] === this.selectedState
+    summarizeStateDeaths() {
+      const filteredCases = Csv.filterRows(
+        this.deathsInfo.deaths,
+        this.selectedState,
+        this.deathsInfo.statesIdx
       )
-      this.deathsTitle = `Deaths (Daily Increase) -- ${state}`
-      this.totalDeaths = byStateCases
-        .map((r) => r.slice(this.deathsIdx))
-        .reduce((cum, cols) => {
-          if (cum.length === 0) {
-            cum = Array(cols.length).fill(0)
-          }
-          return cols.map((col, idx) => (cum[idx] += parseInt(col)))
-        }, [])
-
+      this.totalDeaths = Csv.subtotals(filteredCases, this.deathsInfo.datesIdx)
       const lastDeathCnt = this.totalDeaths[this.totalDeaths.length - 1]
+      const totalPopulation = Csv.sumColumn(
+        filteredCases,
+        this.deathsInfo.populationIdx
+      )
 
-      const totalPopulation = byStateCases
-        .map((r) => r[this.deathsIdx - 1])
-        .reduce((cum, val) => (cum += parseInt(val)), 0)
-
-      this.deathSubTitle = `Deaths / Population: ${(
-        (lastDeathCnt / totalPopulation) *
-        100
-      ).toFixed(4)}%`
+      this.deathsInfo.deathRate = lastDeathCnt / totalPopulation
     }
   }
 }

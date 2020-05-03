@@ -59,7 +59,7 @@ module.exports = {
     extend(config, ctx) {},
     parallel: true,
     cache: true,
-    hardSource: true
+    hardSource: false
   },
   globals: {
     loadingTimeout: 5000
