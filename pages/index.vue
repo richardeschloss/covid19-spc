@@ -46,6 +46,9 @@
           class="col-md-6"
         />
       </div>
+      <div>
+        <feeds :state="selectedState" :region="selectedRegion" />
+      </div>
     </div>
   </div>
 </template>
@@ -54,11 +57,13 @@
 import Csv from '@/utils/Csv'
 import ComboSelect from '@/components/ComboSelect'
 import TrendChart from '@/components/TrendChart'
+import Feeds from '@/components/Feeds'
 
 export default {
   components: {
     TrendChart,
-    ComboSelect
+    ComboSelect,
+    Feeds
   },
   data() {
     return {
@@ -141,14 +146,17 @@ export default {
     },
     regionSelected(region) {
       localStorage.setItem('selectedRegion', region)
+      this.$emit('stateSelected', region)
       this.selectedRegion = region
       this.summarizeCases()
       this.summarizeDeaths()
     },
     stateSelected(state) {
       localStorage.setItem('selectedState', state)
+      this.$emit('stateSelected', state)
       this.selectedState = state
       this.selectedRegion = ''
+      localStorage.setItem('selectedRegion', '')
       this.summarizeCases()
       this.summarizeDeaths()
     },

@@ -8,7 +8,7 @@
 </template>
 
 <script>
-import Stats from '@/utils/Stats'
+import Stats from 'les-utils/dist/stats'
 export default {
   props: {
     dates: {

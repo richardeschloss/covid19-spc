@@ -1,13 +1,12 @@
-import axios from 'axios'
-
 const Csv = {
   extractColumn(arr, col) {
     return arr.map((r) => r[col])
   },
-  async fetch(url) {
-    const { data } = await axios.get(url)
-    const raw = Csv.parse(data)
-    return { hdr: raw[0], data: raw.slice(1) }
+  fetch(url) {
+    return fetch(url)
+      .then((res) => res.text())
+      .then(Csv.parse)
+      .then((raw) => ({ hdr: raw[0], data: raw.slice(1) }))
   },
   filterRows(data, prop, colIdx) {
     return data.filter((r) => r[colIdx] === prop)

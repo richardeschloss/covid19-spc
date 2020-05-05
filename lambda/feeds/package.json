@@ -1,0 +1,15 @@
+{
+  "name": "feeds",
+  "version": "1.0.0",
+  "description": "feeds",
+  "main": "feeds.js",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Richard Schloss",
+  "license": "MIT",
+  "dependencies": {
+    "les-utils": "^1.0.3"
+  }
+}
