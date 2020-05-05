@@ -92,3 +92,5 @@ sw.*
 io/plugin.compiled.js
 
 public
+# Local Netlify folder
+.netlify
