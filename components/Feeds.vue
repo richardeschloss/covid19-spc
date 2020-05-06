@@ -57,6 +57,7 @@ export default {
         .then((res) => res.json())
         .then((feeds) => {
           const data = feeds.rss.channel[0]
+          console.log('env!', process.env)
           console.log(feeds)
           Object.assign(this.meta, {
             copyright: data.copyright[0],
