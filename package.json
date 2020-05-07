@@ -24,7 +24,7 @@
   "repository": "https://github.com/richardeschloss/covid19-spc",
   "scripts": {
     "dev": "nuxt",
-    "prebuild": "API_TOKEN=$API_TOKEN node checkUsage.js && LAMBDA=$LAMBDA node lambdaCheck.js",
+    "prebuild": "node checkUsage.js",
     "build": "nuxt build",
     "start": "cross-env node server/index.js",
     "generate": "nuxt generate",
