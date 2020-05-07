@@ -28,7 +28,7 @@
     "build": "nuxt build",
     "start": "cross-env node server/index.js",
     "generate": "nuxt generate",
-    "deploy:netlify": "npm run prebuild && npm run generate",
+    "generate:netlify": "npm run prebuild && npm run generate",
     "lint": "eslint --ext .js,.vue --ignore-path .gitignore .",
     "test": "cross-env NODE_ENV=test npm run test:specs:cov && npm run test:e2e:cov",
     "test:specs": "cross-env TEST=specs ava --config specs.config.js",
