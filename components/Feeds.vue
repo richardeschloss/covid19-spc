@@ -41,13 +41,16 @@ export default {
     }
   },
   mounted() {
-    this.getFeeds({ state: this.state, region: this.region })
-    this.$parent.$on('stateSelected', (state) => {
-      this.getFeeds({ state })
-    })
-    this.$parent.$on('regionSelected', (region) => {
-      this.getFeeds({ state: this.state, region })
-    })
+    const { functionsEnabled } = process.env
+    if (functionsEnabled) {
+      this.getFeeds({ state: this.state, region: this.region })
+      this.$parent.$on('stateSelected', (state) => {
+        this.getFeeds({ state })
+      })
+      this.$parent.$on('regionSelected', (region) => {
+        this.getFeeds({ state: this.state, region })
+      })
+    }
   },
   methods: {
     getFeeds({ state = '', region = '' }) {
@@ -57,8 +60,6 @@ export default {
         .then((res) => res.json())
         .then((feeds) => {
           const data = feeds.rss.channel[0]
-          console.log('env!', process.env)
-          console.log(feeds)
           Object.assign(this.meta, {
             copyright: data.copyright[0],
             description: data.description[0],

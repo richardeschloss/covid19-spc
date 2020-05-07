@@ -3,9 +3,6 @@ const { Rexter } = require('les-utils')
 const { SITE_ID: siteId, API_TOKEN } = process.env
 const config = require('./netlify.config.json')
 
-// console.log('using access token', API_TOKEN, SITE_ID)
-console.log('using...siteId', siteId)
-
 async function checkUsage() {
   const rexter = Rexter({})
 
@@ -27,7 +24,7 @@ async function checkUsage() {
   const functionsEnabled =
     invocations.used < invocations.included && runtime.used < runtime.included
 
-  console.log('Lambda under usage...Lambda Enabled!', functionsEnabled)
+  console.log('Lambda Enabled? (under usage?)', functionsEnabled)
   config.functionsEnabled = functionsEnabled
   writeFileSync('./netlify.config.json', JSON.stringify(config))
 }

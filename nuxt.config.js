@@ -1,3 +1,5 @@
+const { functionsEnabled } = require('./netlify.config.json')
+
 module.exports = {
   env: {
     casesUrl:
@@ -6,7 +8,8 @@ module.exports = {
     deathsUrl:
       'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_US.csv',
 
-    feedsPath: '/.netlify/functions/feeds'
+    feedsPath: '/.netlify/functions/feeds',
+    functionsEnabled
   },
   mode: 'universal',
   /*
