@@ -24,6 +24,7 @@ async function checkUsage() {
   const functionsEnabled =
     invocations.used < invocations.included && runtime.used < runtime.included
 
+  console.log({ invocations, runtime })
   console.log('Lambda Enabled? (under usage?)', functionsEnabled)
   config.functionsEnabled = functionsEnabled
   writeFileSync('./netlify.config.json', JSON.stringify(config))
