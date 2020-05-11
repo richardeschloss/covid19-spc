@@ -43,10 +43,7 @@ module.exports = {
   /*
    ** Nuxt.js dev-modules
    */
-  buildModules: [
-    // Doc: https://github.com/nuxt-community/eslint-module
-    '@nuxtjs/eslint-module'
-  ],
+  buildModules: [],
   /*
    ** Nuxt.js modules
    */
@@ -61,7 +58,7 @@ module.exports = {
     /*
      ** You can extend webpack config here
      */
-    extend(config, ctx) {},
+    extend (config, ctx) {},
     parallel: true,
     cache: true,
     hardSource: false

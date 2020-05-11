@@ -15,34 +15,34 @@
           id="stateSelect"
           v-model="selectedState"
           :items="casesInfo.states"
-          @itemSelected="stateSelected"
           placeholder="Select State"
           class="col-md-6"
+          @itemSelected="stateSelected"
         />
         <combo-select
           id="regionSelect"
           v-model="selectedRegion"
           :items="casesInfo.regions"
-          @input="regionInput"
-          @itemSelected="regionSelected"
           placeholder="Select Region"
           class="col-md-6"
+          @input="regionInput"
+          @itemSelected="regionSelected"
         />
       </div>
       <div class="row">
         <trend-chart
           :dates="casesInfo.dates"
-          :trendData="totalCases"
-          :selectedState="selectedState"
+          :trend-data="totalCases"
+          :selected-state="selectedState"
           :title="casesTitle"
           class="col-md-6"
         />
         <trend-chart
           :dates="casesInfo.dates"
-          :trendData="totalDeaths"
-          :selectedState="selectedState"
+          :trend-data="totalDeaths"
+          :selected-state="selectedState"
           :title="deathsTitle"
-          :subTitle="deathSubTitle"
+          :sub-title="deathSubTitle"
           class="col-md-6"
         />
       </div>
@@ -65,6 +65,21 @@ export default {
     ComboSelect,
     Feeds
   },
+  fetch() {
+    this.selectedState = localStorage.getItem('selectedState') || ''
+    this.selectedRegion = localStorage.getItem('selectedRegion') || ''
+    const p = [process.env.casesUrl, process.env.deathsUrl].map(Csv.fetch)
+    console.time('fetch')
+    Promise.all(p).then(([rawCases, rawDeaths]) => {
+      console.timeEnd('fetch')
+      this.parseCases(rawCases)
+      this.parseDeaths(rawDeaths)
+      if (this.selectedState !== '') {
+        this.summarizeCases()
+        this.summarizeDeaths()
+      }
+    })
+  },
   data() {
     return {
       casesTitle: 'Cases (Daily Increase) -- [select state]',
@@ -86,21 +101,6 @@ export default {
       totalCases: [],
       totalDeaths: []
     }
-  },
-  fetch() {
-    this.selectedState = localStorage.getItem('selectedState') || ''
-    this.selectedRegion = localStorage.getItem('selectedRegion') || ''
-    const p = [process.env.casesUrl, process.env.deathsUrl].map(Csv.fetch)
-    console.time('fetch')
-    Promise.all(p).then(([rawCases, rawDeaths]) => {
-      console.timeEnd('fetch')
-      this.parseCases(rawCases)
-      this.parseDeaths(rawDeaths)
-      if (this.selectedState !== '') {
-        this.summarizeCases()
-        this.summarizeDeaths()
-      }
-    })
   },
   fetchOnServer: false,
   methods: {
