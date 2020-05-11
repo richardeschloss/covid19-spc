@@ -2,6 +2,7 @@
   <div>
     <highcharts
       v-if="trendData.length > 0"
+      :constructor-type="'stockChart'"
       :options="chartOptions"
     ></highcharts>
   </div>
@@ -9,6 +10,14 @@
 
 <script>
 import Stats from 'les-utils/dist/stats'
+
+import Highcharts from 'highcharts'
+import stockInit from 'highcharts/modules/stock'
+
+if (typeof Highcharts === 'object') {
+  stockInit(Highcharts)
+}
+
 export default {
   props: {
     dates: {
@@ -49,6 +58,9 @@ export default {
         chart: {
           type: 'spline',
           zoomType: 'x'
+        },
+        rangeSelector: {
+          selected: 0
         },
         title: {
           text: this.title
