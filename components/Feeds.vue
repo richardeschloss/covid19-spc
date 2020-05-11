@@ -66,7 +66,17 @@ export default {
             rssLink: data.link[0],
             title: data.title[0]
           })
-          this.feeds = data.item
+          this.feeds = data.item.sort((a, b) => {
+            const a1 = (new Date(a.pubDate[0])).getTime()
+            const b1 = (new Date(b.pubDate[0])).getTime()
+            if (a1 > b1) {
+              return -1
+            } else if (a1 < b1) {
+              return 1
+            } else {
+              return 0
+            }
+          })
         })
     }
   }
