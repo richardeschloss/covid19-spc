@@ -1,8 +1,8 @@
 <template>
   <div>
     <highcharts
-      :options="chartOptions"
       v-if="trendData.length > 0"
+      :options="chartOptions"
     ></highcharts>
   </div>
 </template>
@@ -47,7 +47,8 @@ export default {
           enabled: false
         },
         chart: {
-          type: 'spline'
+          type: 'spline',
+          zoomType: 'x'
         },
         title: {
           text: this.title
