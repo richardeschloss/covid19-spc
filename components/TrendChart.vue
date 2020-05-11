@@ -10,12 +10,6 @@
 
 <script>
 import Stats from 'les-utils/dist/stats'
-import Highcharts from 'highcharts'
-import stockInit from 'highcharts/modules/stock'
-
-if (typeof Highcharts === 'object') {
-  stockInit(Highcharts)
-}
 
 export default {
   props: {
