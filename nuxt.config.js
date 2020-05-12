@@ -39,7 +39,7 @@ module.exports = {
   /*
    ** Plugins to load before mounting the App
    */
-  plugins: ['plugins/globals'],
+  plugins: ['plugins/globals.client'],
   /*
    ** Nuxt.js dev-modules
    */
@@ -59,8 +59,8 @@ module.exports = {
      ** You can extend webpack config here
      */
     extend (config, ctx) {},
-    parallel: true,
-    cache: true,
+    parallel: false,
+    cache: false,
     hardSource: false
   },
   globals: {
